@@ -3,12 +3,14 @@ module github.com/jinpikaFE/go_fiber
 go 1.18
 
 require (
+	github.com/arsmn/fiber-swagger/v2 v2.31.1
 	github.com/go-ini/ini v1.66.6
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/gofiber/fiber/v2 v2.36.0
 	github.com/gofiber/jwt/v3 v3.2.13
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/gomodule/redigo v1.8.9
+	github.com/swaggo/swag v1.8.4
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.463
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sms v1.0.463
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.36
@@ -22,7 +24,6 @@ require (
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
-	github.com/arsmn/fiber-swagger/v2 v2.31.1 // indirect
 	github.com/clbanning/mxj v1.8.4 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
@@ -46,7 +47,6 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/swaggo/files v0.0.0-20220728132757-551d4a08d97a // indirect
-	github.com/swaggo/swag v1.8.4 // indirect
 	github.com/urfave/cli/v2 v2.11.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.38.0 // indirect
