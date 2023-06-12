@@ -6,6 +6,7 @@ import (
 
 	"github.com/influxdata/influxdb-client-go/v2"
 	"github.com/influxdata/influxdb-client-go/v2/api/write"
+	"github.com/jinpikaFE/go_fiber/pkg/untils"
 )
 
 func SetTest() *write.Point {
@@ -25,20 +26,12 @@ func GetTest() (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	// 处理查询结果
-	results := []map[string]interface{}{}
-	for result.Next() {
-		record := result.Record()
-		item := map[string]interface{}{}
-		for key, value := range record.Values() {
-			item[key] = value
-		}
-		results = append(results, item)
-	}
-	if err := result.Err(); err != nil {
-		return nil, err
+	results, resErr := untils.InfluxdbQueryResult(result)
+
+	if resErr != nil {
+		return nil, resErr
 	}
 
 	// 返回 JSON
-	return results,nil
+	return results, nil
 }
