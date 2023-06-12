@@ -13,6 +13,7 @@ var org, bucket string
 
 // 写入数据的api 实例
 var writeAPI api.WriteAPI
+var queryAPI api.QueryAPI
 
 func init() {
 	sec, err := setting.Cfg.GetSection("influxdb")
@@ -29,5 +30,5 @@ func init() {
 
 	// Create a new write API instance
 	writeAPI = influxdbClient.WriteAPI(org, bucket)
-
+	queryAPI = influxdbClient.QueryAPI(org)
 }

@@ -71,7 +71,8 @@ func InitRouter() *fiber.App {
 	}
 
 	{
-		apiv1.Get("/intest", controller.SetTest)
+		apiv1.Post("/intest", controller.SetTest)
+		apiv1.Get("/intest", controller.GetTest)
 	}
 
 	{
