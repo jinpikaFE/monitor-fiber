@@ -52,7 +52,11 @@ func SetTest() *write.Point {
 }
 
 func GetTest() (interface{}, error) {
-	query := `from(bucket:"monitor_fiber")|> range(start: -8d) |> filter(fn: (r) => r._measurement == "whiteScreen") |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")`
+	query := `from(bucket:"monitor_fiber")
+	|> range(start: -8d)
+	|> filter(fn: (r) => r._measurement == "whiteScreen")
+	|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+	|> drop(columns:["_start","_stop"])` // 丢弃不需要的字段
 	result, err := queryAPI.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
