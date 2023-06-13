@@ -57,8 +57,9 @@ func InitRouter() *fiber.App {
 		DeepLinking: false,
 	}))
 
+	// 跨域
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:10086",
+		AllowOrigins: "http://localhost:8080",
 	}))
 
 	// 监控
@@ -73,6 +74,11 @@ func InitRouter() *fiber.App {
 	{
 		apiv1.Post("/intest", controller.SetTest)
 		apiv1.Get("/intest", controller.GetTest)
+	}
+
+	{
+		apiv1.Post("/monitor", controller.SetMonitor)
+		apiv1.Get("/monitor", controller.GetMonitor)
 	}
 
 	{
