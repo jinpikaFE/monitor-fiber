@@ -1,6 +1,7 @@
 package untils
 
 import (
+	"encoding/json"
 	"regexp"
 
 	"github.com/influxdata/influxdb-client-go/v2/api"
@@ -15,7 +16,7 @@ func VerifyMobileFormat(mobileNum string) bool {
 }
 
 // influxdb 查询结果处理
-func InfluxdbQueryResult(result *api.QueryTableResult) ([]map[string]interface{}, error){
+func InfluxdbQueryResult(result *api.QueryTableResult) ([]map[string]interface{}, error) {
 	results := []map[string]interface{}{}
 	for result.Next() {
 		record := result.Record()
@@ -29,4 +30,19 @@ func InfluxdbQueryResult(result *api.QueryTableResult) ([]map[string]interface{}
 		return nil, err
 	}
 	return results, nil
+}
+
+// 结构转map
+func StructToMap(obj interface{}) map[string]interface{} {
+	// 将结构体转换成字节数组
+	b, err := json.Marshal(obj)
+	if err != nil {
+		return nil
+	}
+	// 解码字节数组为 map
+	var result map[string]interface{}
+	if err := json.Unmarshal(b, &result); err != nil {
+		return nil
+	}
+	return result
 }
