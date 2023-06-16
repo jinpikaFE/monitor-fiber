@@ -22,7 +22,26 @@ func InfluxdbQueryResult(result *api.QueryTableResult) ([]map[string]interface{}
 		record := result.Record()
 		item := map[string]interface{}{}
 		for key, value := range record.Values() {
-			item[key] = value
+			itemValue := value
+			if v, ok := itemValue.(string); ok {
+				// 如果当前值是字符串，则尝试解析其为 JSON 对象、数组或数值
+				var jsonValue interface{}
+				err := json.Unmarshal([]byte(v), &jsonValue)
+				if err == nil {
+					switch realValue := jsonValue.(type) {
+					case map[string]interface{}:
+						// 当前值是 JSON 对象
+						itemValue = realValue
+					case []interface{}:
+						// 当前值是 JSON 数组
+						itemValue = realValue
+					default:
+						// 当前值是 JSON 数值、字符串、布尔值或 null
+						itemValue = realValue
+					}
+				}
+			}
+			item[key] = itemValue
 		}
 		results = append(results, item)
 	}
