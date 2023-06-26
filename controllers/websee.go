@@ -1,10 +1,13 @@
 package controller
 
 import (
+	"encoding/json"
+	"encoding/xml"
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinpikaFE/go_fiber/models"
 	"github.com/jinpikaFE/go_fiber/pkg/app"
-	"github.com/jinpikaFE/go_fiber/pkg/logging"
 )
 
 // 添加监控数据
@@ -20,9 +23,21 @@ func SetMonitor(c *fiber.Ctx) error {
 	appF := app.Fiber{C: c}
 	data := &models.ReportData{}
 
-	if err := c.BodyParser(data); err != nil {
-		logging.Error(err)
-		return appF.Response(fiber.StatusInternalServerError, fiber.StatusInternalServerError, "参数解析错误", err)
+	switch ct := c.Get("Content-Type"); ct {
+	case "application/json":
+		if err := json.Unmarshal(c.Body(), &data); err != nil {
+			return err
+		}
+	case "text/plain;charset=UTF-8":
+		if err := json.Unmarshal([]byte(c.Body()), &data); err != nil {
+			return err
+		}
+	case "application/xml":
+		if err := xml.Unmarshal(c.Body(), &data); err != nil {
+			return err
+		}
+	default:
+		return appF.Response(fiber.StatusInternalServerError, fiber.StatusInternalServerError, "参数解析错误", fmt.Errorf("unsupported Content-Type: %v", ct))
 	}
 	p := models.SetMonitor(data)
 	return appF.Response(fiber.StatusOK, fiber.StatusOK, "SUCCESS", p)
