@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
@@ -90,41 +91,41 @@ type DeviceInfo struct {
 }
 
 type ReportData struct {
-	Type            string           `json:"type"`
-	PageUrl         string           `json:"pageUrl"`
-	Time            int64            `json:"time"`
-	UUID            string           `json:"uuid"`
-	Apikey          string           `json:"apikey"`
-	Status          string           `json:"status"`
-	SdkVersion      string           `json:"sdkVersion"`
+	Type            string            `json:"type"`
+	PageUrl         string            `json:"pageUrl"`
+	Time            int64             `json:"time"`
+	UUID            string            `json:"uuid"`
+	Apikey          string            `json:"apikey"`
+	Status          string            `json:"status"`
+	SdkVersion      string            `json:"sdkVersion"`
 	Breadcrumb      []*BreadcrumbData `json:"breadcrumb"`
-	HttpData        *HttpData        `json:"httpData,omitempty"`
-	ResourceError   *ResourceError   `json:"resourceError,omitempty"`
-	LongTask        *LongTask        `json:"longTask,omitempty"`
-	PerformanceData *PerformanceData `json:"performanceData,omitempty"`
-	MemoryData      *MemoryData      `json:"memoryData,omitempty"`
-	CodeError       *CodeError       `json:"codeError,omitempty"`
-	RecordScreen    *RecordScreen    `json:"recordScreen,omitempty"`
-	DeviceInfo      *DeviceInfo      `json:"deviceInfo,omitempty"`
+	HttpData        *HttpData         `json:"httpData,omitempty"`
+	ResourceError   *ResourceError    `json:"resourceError,omitempty"`
+	LongTask        *LongTask         `json:"longTask,omitempty"`
+	PerformanceData *PerformanceData  `json:"performanceData,omitempty"`
+	MemoryData      *MemoryData       `json:"memoryData,omitempty"`
+	CodeError       *CodeError        `json:"codeError,omitempty"`
+	RecordScreen    *RecordScreen     `json:"recordScreen,omitempty"`
+	DeviceInfo      *DeviceInfo       `json:"deviceInfo,omitempty"`
 }
 
 type ReportDataJson struct {
-	Type            string           `json:"type"`
-	PageUrl         string           `json:"pageUrl"`
-	Time            int64            `json:"time"`
-	UUID            string           `json:"uuid"`
-	Apikey          string           `json:"apikey"`
-	Status          string           `json:"status"`
-	SdkVersion      string           `json:"sdkVersion"`
+	Type            string `json:"type"`
+	PageUrl         string `json:"pageUrl"`
+	Time            int64  `json:"time"`
+	UUID            string `json:"uuid"`
+	Apikey          string `json:"apikey"`
+	Status          string `json:"status"`
+	SdkVersion      string `json:"sdkVersion"`
 	Breadcrumb      string `json:"breadcrumb"`
-	HttpData        string        `json:"httpData,omitempty"`
-	ResourceError   string   `json:"resourceError,omitempty"`
-	LongTask        string        `json:"longTask,omitempty"`
+	HttpData        string `json:"httpData,omitempty"`
+	ResourceError   string `json:"resourceError,omitempty"`
+	LongTask        string `json:"longTask,omitempty"`
 	PerformanceData string `json:"performanceData,omitempty"`
-	MemoryData      string      `json:"memoryData,omitempty"`
-	CodeError       string       `json:"codeError,omitempty"`
-	RecordScreen    string    `json:"recordScreen,omitempty"`
-	DeviceInfo      string      `json:"deviceInfo,omitempty"`
+	MemoryData      string `json:"memoryData,omitempty"`
+	CodeError       string `json:"codeError,omitempty"`
+	RecordScreen    string `json:"recordScreen,omitempty"`
+	DeviceInfo      string `json:"deviceInfo,omitempty"`
 }
 
 type ResourceTarget struct {
@@ -142,84 +143,91 @@ type AuthInfo struct {
 type BreadcrumbData struct {
 	Type     string      `json:"type"`
 	Category string      `json:"category"`
-	Status   string       `json:"status"`
+	Status   string      `json:"status"`
 	Time     int64       `json:"time"`
 	Data     interface{} `json:"data,omitempty"`
+}
+
+type MonitorParams struct {
+	Type string `validate:"required" query:"type" json:"type" xml:"type" form:"type"`
+	// query tag是query参数别名，json xml，form适合post
+	StartTime string `validate:"required" query:"startTime" json:"startTime" xml:"startTime" form:"startTime"`
+	EndTime   string `validate:"required" query:"endTime" json:"endTime" xml:"endTime" form:"endTime"`
 }
 
 func SetMonitor(data *ReportData) *write.Point {
 	dataJson := new(ReportDataJson)
 	dataJson.Type = data.Type
-	dataJson.PageUrl= data.PageUrl
-	dataJson.Time= data.Time
-	dataJson.UUID= data.UUID
-	dataJson.Apikey= data.Apikey
-	dataJson.Status= data.Status
-	dataJson.SdkVersion= data.SdkVersion
-	if (data.Breadcrumb != nil) {
-		breaByt,err := json.Marshal(data.Breadcrumb)
+	dataJson.PageUrl = data.PageUrl
+	dataJson.Time = data.Time
+	dataJson.UUID = data.UUID
+	dataJson.Apikey = data.Apikey
+	dataJson.Status = data.Status
+	dataJson.SdkVersion = data.SdkVersion
+	if data.Breadcrumb != nil {
+		breaByt, err := json.Marshal(data.Breadcrumb)
 		if err != nil {
 			return nil
 		}
 		dataJson.Breadcrumb = string(breaByt)
 	}
-	if (data.HttpData != nil) {
-		breaByt,err := json.Marshal(data.HttpData)
+	if data.HttpData != nil {
+		breaByt, err := json.Marshal(data.HttpData)
 		if err != nil {
 			return nil
 		}
 		dataJson.HttpData = string(breaByt)
 	}
-	if (data.ResourceError != nil) {
-		breaByt,err := json.Marshal(data.ResourceError)
+	if data.ResourceError != nil {
+		breaByt, err := json.Marshal(data.ResourceError)
 		if err != nil {
 			return nil
 		}
 		dataJson.ResourceError = string(breaByt)
 	}
 
-	if (data.LongTask != nil) {
-		breaByt,err := json.Marshal(data.LongTask)
+	if data.LongTask != nil {
+		breaByt, err := json.Marshal(data.LongTask)
 		if err != nil {
 			return nil
 		}
 		dataJson.LongTask = string(breaByt)
 	}
 
-	if (data.PerformanceData != nil) {
-		breaByt,err := json.Marshal(data.PerformanceData)
+	if data.PerformanceData != nil {
+		breaByt, err := json.Marshal(data.PerformanceData)
 		if err != nil {
 			return nil
 		}
 		dataJson.PerformanceData = string(breaByt)
 	}
 
-	if (data.MemoryData != nil) {
-		breaByt,err := json.Marshal(data.MemoryData)
+	if data.MemoryData != nil {
+		breaByt, err := json.Marshal(data.MemoryData)
 		if err != nil {
 			return nil
 		}
 		dataJson.MemoryData = string(breaByt)
 	}
 
-	if (data.CodeError != nil) {
-		breaByt,err := json.Marshal(data.CodeError)
+	if data.CodeError != nil {
+		breaByt, err := json.Marshal(data.CodeError)
 		if err != nil {
 			return nil
 		}
 		dataJson.CodeError = string(breaByt)
 	}
 
-	if (data.RecordScreen != nil) {
-		breaByt,err := json.Marshal(data.RecordScreen)
+	if data.RecordScreen != nil {
+		breaByt, err := json.Marshal(data.RecordScreen)
 		if err != nil {
 			return nil
 		}
 		dataJson.RecordScreen = string(breaByt)
 	}
 
-	if (data.DeviceInfo != nil) {
-		breaByt,err := json.Marshal(data.DeviceInfo)
+	if data.DeviceInfo != nil {
+		breaByt, err := json.Marshal(data.DeviceInfo)
 		if err != nil {
 			return nil
 		}
@@ -234,21 +242,73 @@ func SetMonitor(data *ReportData) *write.Point {
 	return p
 }
 
-func GetMonitor() (interface{}, error) {
-	query := `from(bucket:"monitor_fiber")
-	|> range(start: -8d)
+func GetMonitor(pageNum int, pageSize int, maps *MonitorParams) (interface{}, interface{}, error) {
+
+	timeLayout := "2006-01-02 15:04:05"
+
+	// 解析时间字符串
+	parsedTime1, err1 := time.Parse(timeLayout, maps.StartTime)
+	if err1 != nil {
+		fmt.Println("解析时间错误:", err1.Error())
+		return nil, 0, err1
+	}
+
+	// 转换为时间戳
+	timestamp1 := parsedTime1.Unix()
+
+	parsedTime2, err2 := time.Parse(timeLayout, maps.EndTime)
+	if err2 != nil {
+		fmt.Println("解析时间错误:", err1.Error())
+		return nil, 0, err2
+	}
+
+	// 转换为时间戳
+	timestamp2 := parsedTime2.Unix()
+
+	queryBase := fmt.Sprintf(`from(bucket:"monitor_fiber")
+	|> range(start: %d, stop: %d)
+	|> filter(fn: (r) => r["_measurement"] == "%s")
 	|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
-	|> drop(columns:["_start","_stop"])` // 丢弃不需要的字段
+	|> drop(columns:["_start","_stop"])
+	`, // drop 丢弃不需要的字段
+		timestamp1, timestamp2, maps.Type)
+	query := fmt.Sprintf(`%s
+	|> limit(n: %d, offset: %d)
+	`,
+		queryBase, pageSize, pageNum)
 	result, err := queryAPI.Query(context.Background(), query)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
+	}
+	queryCount := fmt.Sprintf(`from(bucket:"monitor_fiber")
+	|> range(start: %d, stop: %d)
+	|> filter(fn: (r) => r["_measurement"] == "%s")
+	|> drop(columns:["_start","_stop"])
+	|> count()
+	`, // drop 丢弃不需要的字段
+		timestamp1, timestamp2, maps.Type)
+	resultCount, errCount := queryAPI.Query(context.Background(), queryCount)
+	if errCount != nil {
+		return nil, 0, errCount
 	}
 	results, resErr := untils.InfluxdbQueryResult(result)
 
 	if resErr != nil {
-		return nil, resErr
+		return nil, 0, resErr
+	}
+
+	// 处理查询结果
+	if resultCount.Err() != nil {
+		fmt.Println("查询结果错误:", resultCount.Err().Error())
+	}
+	for resultCount.Next() {
+		if resultCount.TableChanged() {
+			fmt.Printf("表: %s\n", resultCount.TableMetadata().String())
+		}
+		/** 待修改，返回总数 */
+		return results, resultCount.Record().Value(), nil
 	}
 
 	// 返回 JSON
-	return results, nil
+	return results, resultCount, nil
 }

@@ -8,6 +8,9 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/jinpikaFE/go_fiber/models"
 	"github.com/jinpikaFE/go_fiber/pkg/app"
+	"github.com/jinpikaFE/go_fiber/pkg/e"
+	"github.com/jinpikaFE/go_fiber/pkg/logging"
+	"github.com/jinpikaFE/go_fiber/pkg/valodates"
 )
 
 // 添加监控数据
@@ -54,9 +57,28 @@ func SetMonitor(c *fiber.Ctx) error {
 // @Router /v1/monitor [get]
 func GetMonitor(c *fiber.Ctx) error {
 	appF := app.Fiber{C: c}
-	p, err := models.GetMonitor()
+	page := &e.PageStruct{}
+	maps := &models.MonitorParams{}
+	err2 := c.QueryParser(page)
+
+	if err := c.QueryParser(maps); err != nil && err2 != nil {
+		logging.Error(err)
+		return appF.Response(fiber.StatusInternalServerError, fiber.StatusInternalServerError, "参数解析错误", err)
+	}
+
+	// 入参验证
+	if errors := valodates.ValidateStruct(*page); errors != nil {
+		return appF.Response(fiber.StatusBadRequest, fiber.StatusBadRequest, "检验参数错误", errors)
+	}
+
+	p, resultCount, err := models.GetMonitor((page.Page-1)*page.PageSize, page.PageSize, maps)
 	if err != nil {
 		return appF.Response(fiber.StatusInternalServerError, fiber.StatusInternalServerError, "查询失败", err)
 	}
-	return appF.Response(fiber.StatusOK, fiber.StatusOK, "SUCCESS", p)
+	result := make(map[string]interface{})
+	result["list"] = p
+	result["pageNum"] = page.Page
+	result["pageSize"] = page.PageSize
+	result["total"] = resultCount
+	return appF.Response(fiber.StatusOK, fiber.StatusOK, "SUCCESS", result)
 }
