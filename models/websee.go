@@ -149,7 +149,8 @@ type BreadcrumbData struct {
 }
 
 type MonitorParams struct {
-	Type string `validate:"required" query:"type" json:"type" xml:"type" form:"type"`
+	Apikey string `query:"apikey" json:"apikey" xml:"apikey" form:"apikey"`
+	Type   string `validate:"required" query:"type" json:"type" xml:"type" form:"type"`
 	// query tag是query参数别名，json xml，form适合post
 	StartTime string `validate:"required" query:"startTime" json:"startTime" xml:"startTime" form:"startTime"`
 	EndTime   string `validate:"required" query:"endTime" json:"endTime" xml:"endTime" form:"endTime"`
@@ -265,32 +266,39 @@ func GetMonitor(pageNum int, pageSize int, maps *MonitorParams) (interface{}, in
 	// 转换为时间戳
 	timestamp2 := parsedTime2.Unix()
 
-	queryBase := fmt.Sprintf(`from(bucket:"monitor_fiber")
+	query := fmt.Sprintf(`from(bucket:"monitor_fiber")
 	|> range(start: %d, stop: %d)
 	|> filter(fn: (r) => r["_measurement"] == "%s")
-	|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
-	|> drop(columns:["_start","_stop"])
 	`, // drop 丢弃不需要的字段
 		timestamp1, timestamp2, maps.Type)
-	query := fmt.Sprintf(`%s
-	|> limit(n: %d, offset: %d)
-	`,
-		queryBase, pageSize, pageNum)
-	result, err := queryAPI.Query(context.Background(), query)
-	if err != nil {
-		return nil, 0, err
+
+	if maps.Apikey != "" {
+		query = fmt.Sprintf(`%s
+			|> filter(fn: (r) => r["apikey"] == "%s")
+			`, query, maps.Apikey)
 	}
-	queryCount := fmt.Sprintf(`from(bucket:"monitor_fiber")
-	|> range(start: %d, stop: %d)
-	|> filter(fn: (r) => r["_measurement"] == "%s")
-	|> drop(columns:["_start","_stop"])
+
+	queryCount := fmt.Sprintf(`%s
 	|> count()
-	`, // drop 丢弃不需要的字段
-		timestamp1, timestamp2, maps.Type)
+	`, query)
 	resultCount, errCount := queryAPI.Query(context.Background(), queryCount)
 	if errCount != nil {
 		return nil, 0, errCount
 	}
+
+	query = fmt.Sprintf(`%s
+	|> drop(columns:["_start","_stop"])
+	|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+	|> limit(n: %d, offset: %d)
+	`, query, pageSize, pageNum)
+
+	fmt.Println("查询语句:", queryCount, query)
+
+	result, err := queryAPI.Query(context.Background(), query)
+	if err != nil {
+		return nil, 0, err
+	}
+
 	results, resErr := untils.InfluxdbQueryResult(result)
 
 	if resErr != nil {
