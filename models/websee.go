@@ -269,6 +269,7 @@ func GetMonitor(pageNum int, pageSize int, maps *MonitorParams) (interface{}, in
 	query := fmt.Sprintf(`from(bucket:"monitor_fiber")
 	|> range(start: %d, stop: %d)
 	|> filter(fn: (r) => r["_measurement"] == "%s")
+	|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
 	`, // drop 丢弃不需要的字段
 		timestamp1, timestamp2, maps.Type)
 
@@ -278,21 +279,17 @@ func GetMonitor(pageNum int, pageSize int, maps *MonitorParams) (interface{}, in
 			`, query, maps.Apikey)
 	}
 
-	queryCount := fmt.Sprintf(`%s
-	|> count()
-	`, query)
-	resultCount, errCount := queryAPI.Query(context.Background(), queryCount)
+	resultCount, errCount := queryAPI.Query(context.Background(), query)
 	if errCount != nil {
 		return nil, 0, errCount
 	}
 
 	query = fmt.Sprintf(`%s
 	|> drop(columns:["_start","_stop"])
-	|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
 	|> limit(n: %d, offset: %d)
 	`, query, pageSize, pageNum)
 
-	fmt.Println("查询语句:", queryCount, query)
+	fmt.Println("查询语句:", query)
 
 	result, err := queryAPI.Query(context.Background(), query)
 	if err != nil {
@@ -305,18 +302,12 @@ func GetMonitor(pageNum int, pageSize int, maps *MonitorParams) (interface{}, in
 		return nil, 0, resErr
 	}
 
-	// 处理查询结果
-	if resultCount.Err() != nil {
-		fmt.Println("查询结果错误:", resultCount.Err().Error())
-	}
-	for resultCount.Next() {
-		if resultCount.TableChanged() {
-			fmt.Printf("表: %s\n", resultCount.TableMetadata().String())
-		}
-		/** 待修改，返回总数 */
-		return results, resultCount.Record().Value(), nil
+	totalCount, errCount := untils.InfluxdbQueryResult(resultCount)
+
+	if errCount != nil {
+		return nil, 0, errCount
 	}
 
 	// 返回 JSON
-	return results, resultCount, nil
+	return results, len(totalCount), nil
 }
