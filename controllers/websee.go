@@ -71,6 +71,11 @@ func GetMonitor(c *fiber.Ctx) error {
 		return appF.Response(fiber.StatusBadRequest, fiber.StatusBadRequest, "检验参数错误", errors)
 	}
 
+	// 入参验证
+	if errors := valodates.ValidateStruct(*maps); errors != nil {
+		return appF.Response(fiber.StatusBadRequest, fiber.StatusBadRequest, "检验参数错误", errors)
+	}
+
 	p, resultCount, err := models.GetMonitor((page.Page-1)*page.PageSize, page.PageSize, maps)
 	if err != nil {
 		return appF.Response(fiber.StatusInternalServerError, fiber.StatusInternalServerError, "查询失败", err)
