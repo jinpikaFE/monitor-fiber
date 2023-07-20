@@ -37,10 +37,23 @@ type ResourceError struct {
 	Name    string `json:"name"`
 }
 
+type Attribution struct {
+	Name          string `json:"name"`
+	EntryType     string `json:"entryType"`
+	StartTime     int    `json:"startTime"`
+	Duration      int    `json:"duration"`
+	ContainerType string `json:"containerType"`
+	ContainerSrc  string `json:"containerSrc"`
+	ContainerID   string `json:"containerId"`
+	ContainerName string `json:"containerName"`
+}
+
 type LongTask struct {
-	Time     int64       `json:"time"`
-	Name     string      `json:"name"`
-	LongTask interface{} `json:"longTask"`
+	StartTime   float32        `json:"startTime"`
+	EntryType   string         `json:"entryType"`
+	Duration    int            `json:"duration"`
+	Name        string         `json:"name"`
+	Attribution []*Attribution `json:"attribution"`
 }
 
 type PerformanceData struct {
@@ -49,13 +62,10 @@ type PerformanceData struct {
 	Rating string `json:"rating"`
 }
 
-type MemoryData struct {
-	Name   string `json:"name"`
-	Memory struct {
-		JSHeapSizeLimit int64 `json:"jsHeapSizeLimit"`
-		TotalJSHeapSize int64 `json:"totalJSHeapSize"`
-		UsedJSHeapSize  int64 `json:"usedJSHeapSize"`
-	} `json:"memory"`
+type Memory struct {
+	JSHeapSizeLimit int64 `json:"jsHeapSizeLimit"`
+	TotalJSHeapSize int64 `json:"totalJSHeapSize"`
+	UsedJSHeapSize  int64 `json:"usedJSHeapSize"`
 }
 
 type CodeError struct {
@@ -91,6 +101,7 @@ type DeviceInfo struct {
 }
 
 type ReportData struct {
+	Name            string            `json:"name"`
 	Type            string            `json:"type"`
 	PageUrl         string            `json:"pageUrl"`
 	Time            int64             `json:"time"`
@@ -103,13 +114,14 @@ type ReportData struct {
 	ResourceError   *ResourceError    `json:"resourceError,omitempty"`
 	LongTask        *LongTask         `json:"longTask,omitempty"`
 	PerformanceData *PerformanceData  `json:"performanceData,omitempty"`
-	MemoryData      *MemoryData       `json:"memoryData,omitempty"`
+	Memory          *Memory           `json:"memory,omitempty"`
 	CodeError       *CodeError        `json:"codeError,omitempty"`
 	RecordScreen    *RecordScreen     `json:"recordScreen,omitempty"`
 	DeviceInfo      *DeviceInfo       `json:"deviceInfo,omitempty"`
 }
 
 type ReportDataJson struct {
+	Name            string `json:"name"`
 	Type            string `json:"type"`
 	PageUrl         string `json:"pageUrl"`
 	Time            int64  `json:"time"`
@@ -122,7 +134,7 @@ type ReportDataJson struct {
 	ResourceError   string `json:"resourceError,omitempty"`
 	LongTask        string `json:"longTask,omitempty"`
 	PerformanceData string `json:"performanceData,omitempty"`
-	MemoryData      string `json:"memoryData,omitempty"`
+	Memory          string `json:"memory,omitempty"`
 	CodeError       string `json:"codeError,omitempty"`
 	RecordScreen    string `json:"recordScreen,omitempty"`
 	DeviceInfo      string `json:"deviceInfo,omitempty"`
@@ -150,6 +162,7 @@ type BreadcrumbData struct {
 
 type MonitorParams struct {
 	Apikey string `query:"apikey" json:"apikey" xml:"apikey" form:"apikey"`
+	Name   string `query:"name" json:"name" xml:"name" form:"name"`
 	Type   string `validate:"required" query:"type" json:"type" xml:"type" form:"type"`
 	// query tag是query参数别名，json xml，form适合post
 	StartTime string `validate:"required" query:"startTime" json:"startTime" xml:"startTime" form:"startTime"`
@@ -158,6 +171,7 @@ type MonitorParams struct {
 
 func SetMonitor(data *ReportData) *write.Point {
 	dataJson := new(ReportDataJson)
+	dataJson.Name = data.Name
 	dataJson.Type = data.Type
 	dataJson.PageUrl = data.PageUrl
 	dataJson.Time = data.Time
@@ -203,12 +217,15 @@ func SetMonitor(data *ReportData) *write.Point {
 		dataJson.PerformanceData = string(breaByt)
 	}
 
-	if data.MemoryData != nil {
-		breaByt, err := json.Marshal(data.MemoryData)
+	fmt.Println("查询语句:", data.Memory)
+
+	if data.Memory != nil {
+		breaByt, err := json.Marshal(data.Memory)
 		if err != nil {
 			return nil
 		}
-		dataJson.MemoryData = string(breaByt)
+		fmt.Println("查询语句2:", string(breaByt))
+		dataJson.Memory = string(breaByt)
 	}
 
 	if data.CodeError != nil {
@@ -234,6 +251,7 @@ func SetMonitor(data *ReportData) *write.Point {
 		}
 		dataJson.DeviceInfo = string(breaByt)
 	}
+	fmt.Println("查询语句3:", dataJson)
 	p := influxdb2.NewPoint(dataJson.Type,
 		map[string]string{"apikeytest": "abcd"}, // tag
 		untils.StructToMap(dataJson),
@@ -279,6 +297,12 @@ func GetMonitor(pageNum int, pageSize int, maps *MonitorParams) (interface{}, in
 			`, query, maps.Apikey)
 	}
 
+	if maps.Name != "" {
+		query = fmt.Sprintf(`%s
+			|> filter(fn: (r) => r["name"] == "%s")
+			`, query, maps.Name)
+	}
+
 	resultCount, errCount := queryAPI.Query(context.Background(), query)
 	if errCount != nil {
 		return nil, 0, errCount
@@ -289,7 +313,7 @@ func GetMonitor(pageNum int, pageSize int, maps *MonitorParams) (interface{}, in
 	|> limit(n: %d, offset: %d)
 	`, query, pageSize, pageNum)
 
-	fmt.Println("查询语句:", query)
+	// fmt.Println("查询语句:", query)
 
 	result, err := queryAPI.Query(context.Background(), query)
 	if err != nil {
