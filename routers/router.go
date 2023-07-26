@@ -1,12 +1,15 @@
 package routers
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	controller "github.com/jinpikaFE/go_fiber/controllers"
 	"github.com/jinpikaFE/go_fiber/pkg/logging"
+	"github.com/jinpikaFE/go_fiber/pkg/setting"
 
 	"github.com/gofiber/fiber/v2/middleware/monitor"
 
@@ -52,8 +55,9 @@ func InitRouter() *fiber.App {
 		"./docs", // path to the file folder
 	)
 
+	// swag init 命令生成
 	app.Get("/docs/*", swagger.New(swagger.Config{ // custom
-		URL:         "http://localhost:8081/docs/swagger.json",
+		URL:         fmt.Sprintf("http://localhost:%d/docs/swagger.json", setting.HTTPPort),
 		DeepLinking: false,
 	}))
 
