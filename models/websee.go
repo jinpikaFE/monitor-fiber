@@ -100,6 +100,17 @@ type DeviceInfo struct {
 	DeviceType     string      `json:"device_type"`    // 设备种类，如pc
 }
 
+type RequestData struct {
+	HttpType string      `json:"httpType"`
+	Method   string      `json:"method"`
+	Data     interface{} `json:"data"`
+}
+
+type Response struct {
+	Status int         `json:"Status"`
+	Data   interface{} `json:"data,omitempty"`
+}
+
 type ReportData struct {
 	Name            string            `json:"name"`
 	Type            string            `json:"type"`
@@ -109,6 +120,17 @@ type ReportData struct {
 	Apikey          string            `json:"apikey"`
 	Status          string            `json:"status"`
 	SdkVersion      string            `json:"sdkVersion"`
+	Events          string            `json:"events"`
+	UserId          string            `json:"userId"`
+	Line            int32             `json:"line" description:"发生错误位置"`
+	Column          int32             `json:"column" description:"发生错误位置"`
+	Message         string            `json:"message" description:"相关信息"`
+	RecordScreenId  string            `json:"recordScreenId" description:"录屏信息id"`
+	FileName        string            `json:"fileName" description:"错误文件"`
+	Url             string            `json:"url" description:"请求url"`
+	ElapsedTime     int32             `json:"elapsedTime" description:"接口时长"` // 接口时长
+	RequestData     *RequestData      `json:"requestData" description:"请求数据"`
+	Response        *Response         `json:"response" description:"响应数据"`
 	Breadcrumb      []*BreadcrumbData `json:"breadcrumb" description:"用户行为"`
 	HttpData        *HttpData         `json:"httpData,omitempty"`
 	ResourceError   *ResourceError    `json:"resourceError,omitempty"`
@@ -129,6 +151,17 @@ type ReportDataJson struct {
 	Apikey          string `json:"apikey"`
 	Status          string `json:"status"`
 	SdkVersion      string `json:"sdkVersion"`
+	Events          string `json:"events"`
+	UserId          string `json:"userId"`
+	Line            int32  `json:"line" description:"发生错误位置"`
+	Column          int32  `json:"column" description:"发生错误位置"`
+	Message         string `json:"message" description:"相关信息"`
+	RecordScreenId  string `json:"recordScreenId"`
+	FileName        string `json:"fileName" description:"错误文件"`
+	Url             string `json:"url" description:"请求url"`
+	ElapsedTime     int32  `json:"elapsedTime" description:"接口时长"` // 接口时长
+	RequestData     string `json:"requestData" description:"请求数据"`
+	Response        string `json:"response" description:"响应数据"`
 	Breadcrumb      string `json:"breadcrumb" description:"用户行为"`
 	HttpData        string `json:"httpData,omitempty"`
 	ResourceError   string `json:"resourceError,omitempty"`
@@ -215,6 +248,22 @@ func SetMonitor(data *ReportData) *write.Point {
 			return nil
 		}
 		dataJson.PerformanceData = string(breaByt)
+	}
+
+	if data.RequestData != nil {
+		breaByt, err := json.Marshal(data.RequestData)
+		if err != nil {
+			return nil
+		}
+		dataJson.RequestData = string(breaByt)
+	}
+
+	if data.Response != nil {
+		breaByt, err := json.Marshal(data.Response)
+		if err != nil {
+			return nil
+		}
+		dataJson.Response = string(breaByt)
 	}
 
 	fmt.Println("查询语句:", data.Memory)
