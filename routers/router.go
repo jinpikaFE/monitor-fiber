@@ -90,6 +90,7 @@ func InitRouter() *fiber.App {
 	{
 		apiv1.Post("/monitor", controller.SetMonitor)
 		apiv1.Get("/monitor", controller.GetMonitor)
+		apiv1.Get("/monitor/echart", controller.GetEchartMonitor)
 	}
 
 	{

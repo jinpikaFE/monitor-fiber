@@ -335,3 +335,66 @@ func GetMonitor(pageNum int, pageSize int, maps *MonitorParams) (interface{}, in
 	// 返回 JSON
 	return results, len(totalCount), nil
 }
+
+func GetEchartMonitor(maps *MonitorParams) (interface{}, error) {
+
+	timeLayout := "2006-01-02 15:04:05"
+
+	// 解析时间字符串
+	parsedTime1, err1 := time.Parse(timeLayout, maps.StartTime)
+	if err1 != nil {
+		fmt.Println("解析时间错误:", err1.Error())
+		return nil, err1
+	}
+
+	// 转换为时间戳
+	timestamp1 := parsedTime1.Unix()
+
+	parsedTime2, err2 := time.Parse(timeLayout, maps.EndTime)
+	if err2 != nil {
+		fmt.Println("解析时间错误:", err1.Error())
+		return nil, err2
+	}
+
+	// 转换为时间戳
+	timestamp2 := parsedTime2.Unix()
+
+	query := fmt.Sprintf(`from(bucket:"monitor_fiber")
+	|> range(start: %d, stop: %d)
+	|> filter(fn: (r) => r["_measurement"] == "%s")
+	|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+	`, // drop 丢弃不需要的字段
+		timestamp1, timestamp2, maps.Type)
+
+	if maps.Apikey != "" {
+		query = fmt.Sprintf(`%s
+			|> filter(fn: (r) => r["apikey"] == "%s")
+			`, query, maps.Apikey)
+	}
+
+	if maps.Name != "" {
+		query = fmt.Sprintf(`%s
+			|> filter(fn: (r) => r["name"] == "%s")
+			`, query, maps.Name)
+	}
+
+	query = fmt.Sprintf(`%s
+	|> drop(columns:["_start","_stop"])
+	`, query)
+
+	// fmt.Println("查询语句:", query)
+
+	result, err := queryAPI.Query(context.Background(), query)
+	if err != nil {
+		return nil, err
+	}
+
+	results, resErr := untils.InfluxdbQueryResult(result)
+
+	if resErr != nil {
+		return nil, resErr
+	}
+
+	// 返回 JSON
+	return results, nil
+}

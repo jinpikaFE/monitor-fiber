@@ -87,3 +87,34 @@ func GetMonitor(c *fiber.Ctx) error {
 	result["total"] = resultCount
 	return appF.Response(fiber.StatusOK, fiber.StatusOK, "SUCCESS", result)
 }
+
+// 获取监控图表数据
+// @Summary 获取监控图表数据
+// @Description 获取监控图表数据
+// @Tags 获取监控图表数据
+// @Accept json
+// @Produce json
+// @Success 200 {object} ResponseHTTP{}
+// @Failure 503 {object} ResponseHTTP{}
+// @Router /v1/monitor/echart [get]
+func GetEchartMonitor(c *fiber.Ctx) error {
+	appF := app.Fiber{C: c}
+	maps := &models.MonitorParams{}
+	if err := c.QueryParser(maps); err != nil {
+		logging.Error(err)
+		return appF.Response(fiber.StatusInternalServerError, fiber.StatusInternalServerError, "参数解析错误", err)
+	}
+
+	// 入参验证
+	if errors := valodates.ValidateStruct(*maps); errors != nil {
+		return appF.Response(fiber.StatusBadRequest, fiber.StatusBadRequest, "检验参数错误", errors)
+	}
+
+	p, err := models.GetEchartMonitor(maps)
+	if err != nil {
+		return appF.Response(fiber.StatusInternalServerError, fiber.StatusInternalServerError, "查询失败", err)
+	}
+	result := make(map[string]interface{})
+	result["list"] = p
+	return appF.Response(fiber.StatusOK, fiber.StatusOK, "SUCCESS", result)
+}
