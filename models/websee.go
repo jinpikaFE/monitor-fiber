@@ -107,7 +107,7 @@ type RequestData struct {
 }
 
 type Response struct {
-	Status int         `json:"Status"`
+	Status int         `json:"status"`
 	Data   interface{} `json:"data,omitempty"`
 }
 
@@ -212,6 +212,15 @@ func SetMonitor(data *ReportData) *write.Point {
 	dataJson.Apikey = data.Apikey
 	dataJson.Status = data.Status
 	dataJson.SdkVersion = data.SdkVersion
+	dataJson.Events = data.Events
+	dataJson.UserId = data.UserId
+	dataJson.Line = data.Line
+	dataJson.Column = data.Column
+	dataJson.Message = data.Message
+	dataJson.RecordScreenId = data.RecordScreenId
+	dataJson.FileName = data.FileName
+	dataJson.Url = data.Url
+	dataJson.ElapsedTime = data.ElapsedTime
 	if data.Breadcrumb != nil {
 		breaByt, err := json.Marshal(data.Breadcrumb)
 		if err != nil {
