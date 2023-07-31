@@ -205,7 +205,13 @@ type MonitorParams struct {
 func SetMonitor(data *ReportData) *write.Point {
 	dataJson := new(ReportDataJson)
 	dataJson.Name = data.Name
-	dataJson.Type = data.Type
+	// xhr和fetch 都是接口错误
+	if data.Type == "xhr" || data.Type == "fetch" {
+		dataJson.Type = "apiErr"
+	} else {
+		dataJson.Type = data.Type
+	}
+
 	dataJson.PageUrl = data.PageUrl
 	dataJson.Time = data.Time
 	dataJson.UUID = data.UUID
