@@ -109,7 +109,7 @@ type ReportData struct {
 	Apikey          string            `json:"apikey"`
 	Status          string            `json:"status"`
 	SdkVersion      string            `json:"sdkVersion"`
-	Breadcrumb      []*BreadcrumbData `json:"breadcrumb"`
+	Breadcrumb      []*BreadcrumbData `json:"breadcrumb" description:"用户行为"`
 	HttpData        *HttpData         `json:"httpData,omitempty"`
 	ResourceError   *ResourceError    `json:"resourceError,omitempty"`
 	LongTask        *LongTask         `json:"longTask,omitempty"`
@@ -129,7 +129,7 @@ type ReportDataJson struct {
 	Apikey          string `json:"apikey"`
 	Status          string `json:"status"`
 	SdkVersion      string `json:"sdkVersion"`
-	Breadcrumb      string `json:"breadcrumb"`
+	Breadcrumb      string `json:"breadcrumb" description:"用户行为"`
 	HttpData        string `json:"httpData,omitempty"`
 	ResourceError   string `json:"resourceError,omitempty"`
 	LongTask        string `json:"longTask,omitempty"`
@@ -153,9 +153,9 @@ type AuthInfo struct {
 }
 
 type BreadcrumbData struct {
-	Type     string      `json:"type"`
-	Category string      `json:"category"`
-	Status   string      `json:"status"`
+	Type     string      `json:"type" description:"事件类型"`
+	Category string      `json:"category" description:"用户行为类型"`
+	Status   string      `json:"status" description:"行为状态"`
 	Time     int64       `json:"time"`
 	Data     interface{} `json:"data,omitempty"`
 }
