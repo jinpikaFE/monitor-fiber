@@ -196,9 +196,10 @@ type BreadcrumbData struct {
 }
 
 type MonitorParams struct {
-	Apikey string `query:"apikey" json:"apikey" xml:"apikey" form:"apikey"`
-	Name   string `query:"name" json:"name" xml:"name" form:"name"`
-	Type   string `validate:"required" query:"type" json:"type" xml:"type" form:"type"`
+	RecordScreenId string `query:"recordScreenId" json:"recordScreenId" xml:"recordScreenId" form:"recordScreenId"`
+	Apikey         string `query:"apikey" json:"apikey" xml:"apikey" form:"apikey"`
+	Name           string `query:"name" json:"name" xml:"name" form:"name"`
+	Type           string `validate:"required" query:"type" json:"type" xml:"type" form:"type"`
 	// query tag是query参数别名，json xml，form适合post
 	StartTime string `validate:"required" query:"startTime" json:"startTime" xml:"startTime" form:"startTime"`
 	EndTime   string `validate:"required" query:"endTime" json:"endTime" xml:"endTime" form:"endTime"`
@@ -379,6 +380,12 @@ func GetEchartMonitor(maps *MonitorParams) (interface{}, error) {
 	|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
 	`, // drop 丢弃不需要的字段
 		timestamp1, timestamp2, maps.Type)
+
+	if maps.RecordScreenId != "" {
+		query = fmt.Sprintf(`%s
+			|> filter(fn: (r) => r["recordScreenId"] == "%s")
+			`, query, maps.RecordScreenId)
+	}
 
 	if maps.Apikey != "" {
 		query = fmt.Sprintf(`%s
