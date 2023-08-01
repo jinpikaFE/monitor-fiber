@@ -115,6 +115,7 @@ type ReportData struct {
 	Name            string            `json:"name"`
 	Type            string            `json:"type"`
 	PageUrl         string            `json:"pageUrl"`
+	Rating          string            `json:"rating" description:"性能指标 poor or good"`
 	Time            int64             `json:"time"`
 	UUID            string            `json:"uuid"`
 	Apikey          string            `json:"apikey"`
@@ -129,9 +130,9 @@ type ReportData struct {
 	FileName        string            `json:"fileName" description:"错误文件"`
 	Url             string            `json:"url" description:"请求url"`
 	ElapsedTime     int32             `json:"elapsedTime" description:"接口时长"` // 接口时长
-	RequestData     *RequestData      `json:"requestData" description:"请求数据"`
-	Response        *Response         `json:"response" description:"响应数据"`
-	Breadcrumb      []*BreadcrumbData `json:"breadcrumb" description:"用户行为"`
+	RequestData     *RequestData      `json:"requestData,omitempty" description:"请求数据"`
+	Response        *Response         `json:"response,omitempty" description:"响应数据"`
+	Breadcrumb      []*BreadcrumbData `json:"breadcrumb,omitempty" description:"用户行为"`
 	HttpData        *HttpData         `json:"httpData,omitempty"`
 	ResourceError   *ResourceError    `json:"resourceError,omitempty"`
 	LongTask        *LongTask         `json:"longTask,omitempty"`
@@ -146,6 +147,7 @@ type ReportDataJson struct {
 	Name            string `json:"name"`
 	Type            string `json:"type"`
 	PageUrl         string `json:"pageUrl"`
+	Rating          string `json:"rating" description:"性能指标 poor or good"`
 	Time            int64  `json:"time"`
 	UUID            string `json:"uuid"`
 	Apikey          string `json:"apikey"`
@@ -160,9 +162,9 @@ type ReportDataJson struct {
 	FileName        string `json:"fileName" description:"错误文件"`
 	Url             string `json:"url" description:"请求url"`
 	ElapsedTime     int32  `json:"elapsedTime" description:"接口时长"` // 接口时长
-	RequestData     string `json:"requestData" description:"请求数据"`
-	Response        string `json:"response" description:"响应数据"`
-	Breadcrumb      string `json:"breadcrumb" description:"用户行为"`
+	RequestData     string `json:"requestData,omitempty" description:"请求数据"`
+	Response        string `json:"response,omitempty" description:"响应数据"`
+	Breadcrumb      string `json:"breadcrumb,omitempty" description:"用户行为"`
 	HttpData        string `json:"httpData,omitempty"`
 	ResourceError   string `json:"resourceError,omitempty"`
 	LongTask        string `json:"longTask,omitempty"`
@@ -202,119 +204,67 @@ type MonitorParams struct {
 	EndTime   string `validate:"required" query:"endTime" json:"endTime" xml:"endTime" form:"endTime"`
 }
 
+func serializeField(field interface{}) (string, error) {
+	if field == nil {
+		return "", nil
+	}
+	jsonBytes, err := json.Marshal(field)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonBytes), nil
+}
+
 func SetMonitor(data *ReportData) *write.Point {
-	dataJson := new(ReportDataJson)
-	dataJson.Name = data.Name
-	// xhr和fetch 都是接口错误
-	if data.Type == "xhr" || data.Type == "fetch" {
-		dataJson.Type = "apiErr"
-	} else {
-		dataJson.Type = data.Type
+	dataJson := &ReportDataJson{
+		Name:           data.Name,
+		Type:           data.Type,
+		PageUrl:        data.PageUrl,
+		Rating:         data.Rating,
+		Time:           time.Now().UnixNano(),
+		UUID:           data.UUID,
+		Apikey:         data.Apikey,
+		Status:         data.Status,
+		SdkVersion:     data.SdkVersion,
+		Events:         data.Events,
+		UserId:         data.UserId,
+		Line:           data.Line,
+		Column:         data.Column,
+		Message:        data.Message,
+		RecordScreenId: data.RecordScreenId,
+		FileName:       data.FileName,
+		Url:            data.Url,
+		ElapsedTime:    data.ElapsedTime,
 	}
 
-	dataJson.PageUrl = data.PageUrl
-	dataJson.Time = data.Time
-	dataJson.UUID = data.UUID
-	dataJson.Apikey = data.Apikey
-	dataJson.Status = data.Status
-	dataJson.SdkVersion = data.SdkVersion
-	dataJson.Events = data.Events
-	dataJson.UserId = data.UserId
-	dataJson.Line = data.Line
-	dataJson.Column = data.Column
-	dataJson.Message = data.Message
-	dataJson.RecordScreenId = data.RecordScreenId
-	dataJson.FileName = data.FileName
-	dataJson.Url = data.Url
-	dataJson.ElapsedTime = data.ElapsedTime
-	if data.Breadcrumb != nil {
-		breaByt, err := json.Marshal(data.Breadcrumb)
-		if err != nil {
-			return nil
-		}
-		dataJson.Breadcrumb = string(breaByt)
-	}
-	if data.HttpData != nil {
-		breaByt, err := json.Marshal(data.HttpData)
-		if err != nil {
-			return nil
-		}
-		dataJson.HttpData = string(breaByt)
-	}
-	if data.ResourceError != nil {
-		breaByt, err := json.Marshal(data.ResourceError)
-		if err != nil {
-			return nil
-		}
-		dataJson.ResourceError = string(breaByt)
+	fields := []struct {
+		fieldPtr *string
+		field    interface{}
+	}{
+		{&dataJson.Breadcrumb, data.Breadcrumb},
+		{&dataJson.HttpData, data.HttpData},
+		{&dataJson.ResourceError, data.ResourceError},
+		{&dataJson.LongTask, data.LongTask},
+		{&dataJson.PerformanceData, data.PerformanceData},
+		{&dataJson.RequestData, data.RequestData},
+		{&dataJson.Response, data.Response},
+		{&dataJson.Memory, data.Memory},
+		{&dataJson.CodeError, data.CodeError},
+		{&dataJson.RecordScreen, data.RecordScreen},
+		{&dataJson.DeviceInfo, data.DeviceInfo},
 	}
 
-	if data.LongTask != nil {
-		breaByt, err := json.Marshal(data.LongTask)
-		if err != nil {
-			return nil
+	for _, f := range fields {
+		if f.fieldPtr != nil {
+			serialized, err := serializeField(f.field)
+			if err != nil {
+				// 错误处理...
+				return nil
+			}
+			*f.fieldPtr = serialized
 		}
-		dataJson.LongTask = string(breaByt)
 	}
 
-	if data.PerformanceData != nil {
-		breaByt, err := json.Marshal(data.PerformanceData)
-		if err != nil {
-			return nil
-		}
-		dataJson.PerformanceData = string(breaByt)
-	}
-
-	if data.RequestData != nil {
-		breaByt, err := json.Marshal(data.RequestData)
-		if err != nil {
-			return nil
-		}
-		dataJson.RequestData = string(breaByt)
-	}
-
-	if data.Response != nil {
-		breaByt, err := json.Marshal(data.Response)
-		if err != nil {
-			return nil
-		}
-		dataJson.Response = string(breaByt)
-	}
-
-	fmt.Println("查询语句:", data.Memory)
-
-	if data.Memory != nil {
-		breaByt, err := json.Marshal(data.Memory)
-		if err != nil {
-			return nil
-		}
-		fmt.Println("查询语句2:", string(breaByt))
-		dataJson.Memory = string(breaByt)
-	}
-
-	if data.CodeError != nil {
-		breaByt, err := json.Marshal(data.CodeError)
-		if err != nil {
-			return nil
-		}
-		dataJson.CodeError = string(breaByt)
-	}
-
-	if data.RecordScreen != nil {
-		breaByt, err := json.Marshal(data.RecordScreen)
-		if err != nil {
-			return nil
-		}
-		dataJson.RecordScreen = string(breaByt)
-	}
-
-	if data.DeviceInfo != nil {
-		breaByt, err := json.Marshal(data.DeviceInfo)
-		if err != nil {
-			return nil
-		}
-		dataJson.DeviceInfo = string(breaByt)
-	}
 	fmt.Println("查询语句3:", dataJson)
 	p := influxdb2.NewPoint(dataJson.Type,
 		map[string]string{"apikeytest": "abcd"}, // tag
