@@ -419,3 +419,37 @@ func GetEchartMonitor(maps *MonitorParams) (interface{}, error) {
 	// 返回 JSON
 	return results, nil
 }
+
+func GetRecordScreen(recordScreenId string) (interface{}, error) {
+
+	query := fmt.Sprintf(`from(bucket:"monitor_fiber")
+	|> range(start: -365d)
+	|> filter(fn: (r) => r["_measurement"] == "recordScreen")
+	|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+	`, // drop 丢弃不需要的字段
+	)
+
+	query = fmt.Sprintf(`%s
+		|> filter(fn: (r) => r["recordScreenId"] == "%s")
+		`, query, recordScreenId)
+
+	query = fmt.Sprintf(`%s
+	|> drop(columns:["_start","_stop"])
+	`, query)
+
+	// fmt.Println("查询语句:", query)
+
+	result, err := queryAPI.Query(context.Background(), query)
+	if err != nil {
+		return nil, err
+	}
+
+	results, resErr := untils.InfluxdbQueryResult(result)
+
+	if resErr != nil {
+		return nil, resErr
+	}
+
+	// 返回 JSON
+	return results, nil
+}

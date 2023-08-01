@@ -118,3 +118,23 @@ func GetEchartMonitor(c *fiber.Ctx) error {
 	result["list"] = p
 	return appF.Response(fiber.StatusOK, fiber.StatusOK, "SUCCESS", result)
 }
+
+// 获取录屏数据
+// @Summary 获取监控图表数据
+// @Description 获取监控图表数据
+// @Tags 获取监控图表数据
+// @Accept json
+// @Produce json
+// @Success 200 {object} ResponseHTTP{}
+// @Failure 503 {object} ResponseHTTP{}
+// @Router /v1/monitor/screen/:id [get]
+func GetRecordScreen(c *fiber.Ctx) error {
+	appF := app.Fiber{C: c}
+	id := c.Params("id")
+
+	p, err := models.GetRecordScreen(id)
+	if err != nil {
+		return appF.Response(fiber.StatusInternalServerError, fiber.StatusInternalServerError, "查询失败", err)
+	}
+	return appF.Response(fiber.StatusOK, fiber.StatusOK, "SUCCESS", p)
+}
