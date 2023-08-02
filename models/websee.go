@@ -196,7 +196,7 @@ type BreadcrumbData struct {
 }
 
 type MonitorParams struct {
-	UserId string `query:"userId" json:"userId" xml:"userId" form:"userId"`
+	UserId         string `query:"userId" json:"userId" xml:"userId" form:"userId"`
 	RecordScreenId string `query:"recordScreenId" json:"recordScreenId" xml:"recordScreenId" form:"recordScreenId"`
 	Apikey         string `query:"apikey" json:"apikey" xml:"apikey" form:"apikey"`
 	Name           string `query:"name" json:"name" xml:"name" form:"name"`
@@ -237,6 +237,10 @@ func SetMonitor(data *ReportData) *write.Point {
 		FileName:       data.FileName,
 		Url:            data.Url,
 		ElapsedTime:    data.ElapsedTime,
+	}
+
+	if data.Type == "xhr" || data.Type == "fetch" {
+		dataJson.Type = "apiErr"
 	}
 
 	fields := []struct {
