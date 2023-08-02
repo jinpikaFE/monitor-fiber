@@ -28,7 +28,7 @@ paths:
             $ref: '#/definitions/controller.ResponseHTTP'
       summary: 获取监控数据
       tags:
-      - 获取监控数据
+      - 监控数据处理
     post:
       consumes:
       - application/json
@@ -46,7 +46,45 @@ paths:
             $ref: '#/definitions/controller.ResponseHTTP'
       summary: 添加监控数据
       tags:
-      - 添加监控数据
+      - 监控数据处理
+  /v1/monitor/echart:
+    get:
+      consumes:
+      - application/json
+      description: 获取监控图表数据
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.ResponseHTTP'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/controller.ResponseHTTP'
+      summary: 获取监控图表数据
+      tags:
+      - 监控数据处理
+  /v1/monitor/screen/:id:
+    get:
+      consumes:
+      - application/json
+      description: 获取录屏数据
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.ResponseHTTP'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/controller.ResponseHTTP'
+      summary: 获取录屏数据
+      tags:
+      - 监控数据处理
   /v1/region:
     get:
       consumes:

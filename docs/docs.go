@@ -26,7 +26,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "获取监控数据"
+                    "监控数据处理"
                 ],
                 "summary": "获取监控数据",
                 "responses": {
@@ -53,9 +53,67 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "添加监控数据"
+                    "监控数据处理"
                 ],
                 "summary": "添加监控数据",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseHTTP"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseHTTP"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/monitor/echart": {
+            "get": {
+                "description": "获取监控图表数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "监控数据处理"
+                ],
+                "summary": "获取监控图表数据",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseHTTP"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseHTTP"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/monitor/screen/:id": {
+            "get": {
+                "description": "获取录屏数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "监控数据处理"
+                ],
+                "summary": "获取录屏数据",
                 "responses": {
                     "200": {
                         "description": "OK",

@@ -16,7 +16,7 @@ import (
 // 添加监控数据
 // @Summary 添加监控数据
 // @Description 添加监控数据
-// @Tags 添加监控数据
+// @Tags 监控数据处理
 // @Accept json
 // @Produce json
 // @Success 200 {object} ResponseHTTP{}
@@ -49,7 +49,7 @@ func SetMonitor(c *fiber.Ctx) error {
 // 获取监控数据
 // @Summary 获取监控数据
 // @Description 获取监控数据
-// @Tags 获取监控数据
+// @Tags 监控数据处理
 // @Accept json
 // @Produce json
 // @Success 200 {object} ResponseHTTP{}
@@ -91,7 +91,7 @@ func GetMonitor(c *fiber.Ctx) error {
 // 获取监控图表数据
 // @Summary 获取监控图表数据
 // @Description 获取监控图表数据
-// @Tags 获取监控图表数据
+// @Tags 监控数据处理
 // @Accept json
 // @Produce json
 // @Success 200 {object} ResponseHTTP{}
@@ -120,9 +120,9 @@ func GetEchartMonitor(c *fiber.Ctx) error {
 }
 
 // 获取录屏数据
-// @Summary 获取监控图表数据
-// @Description 获取监控图表数据
-// @Tags 获取监控图表数据
+// @Summary 获取录屏数据
+// @Description 获取录屏数据
+// @Tags 监控数据处理
 // @Accept json
 // @Produce json
 // @Success 200 {object} ResponseHTTP{}
