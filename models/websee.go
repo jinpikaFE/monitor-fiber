@@ -130,6 +130,7 @@ type ReportData struct {
 	FileName        string            `json:"fileName" description:"错误文件"`
 	Url             string            `json:"url" description:"请求url"`
 	ElapsedTime     int32             `json:"elapsedTime" description:"接口时长"` // 接口时长
+	Value           float32           `json:"value,omitempty" description:"性能指标值"`
 	RequestData     *RequestData      `json:"requestData,omitempty" description:"请求数据"`
 	Response        *Response         `json:"response,omitempty" description:"响应数据"`
 	Breadcrumb      []*BreadcrumbData `json:"breadcrumb,omitempty" description:"用户行为"`
@@ -144,35 +145,36 @@ type ReportData struct {
 }
 
 type ReportDataJson struct {
-	Name            string `json:"name"`
-	Type            string `json:"type"`
-	PageUrl         string `json:"pageUrl"`
-	Rating          string `json:"rating" description:"性能指标 poor or good"`
-	Time            int64  `json:"time"`
-	UUID            string `json:"uuid"`
-	Apikey          string `json:"apikey"`
-	Status          string `json:"status"`
-	SdkVersion      string `json:"sdkVersion"`
-	Events          string `json:"events"`
-	UserId          string `json:"userId"`
-	Line            int32  `json:"line" description:"发生错误位置"`
-	Column          int32  `json:"column" description:"发生错误位置"`
-	Message         string `json:"message" description:"相关信息"`
-	RecordScreenId  string `json:"recordScreenId"`
-	FileName        string `json:"fileName" description:"错误文件"`
-	Url             string `json:"url" description:"请求url"`
-	ElapsedTime     int32  `json:"elapsedTime" description:"接口时长"` // 接口时长
-	RequestData     string `json:"requestData,omitempty" description:"请求数据"`
-	Response        string `json:"response,omitempty" description:"响应数据"`
-	Breadcrumb      string `json:"breadcrumb,omitempty" description:"用户行为"`
-	HttpData        string `json:"httpData,omitempty"`
-	ResourceError   string `json:"resourceError,omitempty"`
-	LongTask        string `json:"longTask,omitempty"`
-	PerformanceData string `json:"performanceData,omitempty"`
-	Memory          string `json:"memory,omitempty"`
-	CodeError       string `json:"codeError,omitempty"`
-	RecordScreen    string `json:"recordScreen,omitempty"`
-	DeviceInfo      string `json:"deviceInfo,omitempty"`
+	Name            string  `json:"name"`
+	Type            string  `json:"type"`
+	PageUrl         string  `json:"pageUrl"`
+	Rating          string  `json:"rating" description:"性能指标 poor or good"`
+	Time            int64   `json:"time"`
+	UUID            string  `json:"uuid"`
+	Apikey          string  `json:"apikey"`
+	Status          string  `json:"status"`
+	SdkVersion      string  `json:"sdkVersion"`
+	Events          string  `json:"events"`
+	UserId          string  `json:"userId"`
+	Line            int32   `json:"line" description:"发生错误位置"`
+	Column          int32   `json:"column" description:"发生错误位置"`
+	Message         string  `json:"message" description:"相关信息"`
+	RecordScreenId  string  `json:"recordScreenId"`
+	FileName        string  `json:"fileName" description:"错误文件"`
+	Url             string  `json:"url" description:"请求url"`
+	ElapsedTime     int32   `json:"elapsedTime" description:"接口时长"` // 接口时长
+	Value           float32 `json:"value,omitempty" description:"性能指标值"`
+	RequestData     string  `json:"requestData,omitempty" description:"请求数据"`
+	Response        string  `json:"response,omitempty" description:"响应数据"`
+	Breadcrumb      string  `json:"breadcrumb,omitempty" description:"用户行为"`
+	HttpData        string  `json:"httpData,omitempty"`
+	ResourceError   string  `json:"resourceError,omitempty"`
+	LongTask        string  `json:"longTask,omitempty"`
+	PerformanceData string  `json:"performanceData,omitempty"`
+	Memory          string  `json:"memory,omitempty"`
+	CodeError       string  `json:"codeError,omitempty"`
+	RecordScreen    string  `json:"recordScreen,omitempty"`
+	DeviceInfo      string  `json:"deviceInfo,omitempty"`
 }
 
 type ResourceTarget struct {
@@ -196,6 +198,7 @@ type BreadcrumbData struct {
 }
 
 type MonitorParams struct {
+	UUID           string `query:"uuid" json:"uuid" xml:"uuid" form:"uuid"`
 	UserId         string `query:"userId" json:"userId" xml:"userId" form:"userId"`
 	RecordScreenId string `query:"recordScreenId" json:"recordScreenId" xml:"recordScreenId" form:"recordScreenId"`
 	Apikey         string `query:"apikey" json:"apikey" xml:"apikey" form:"apikey"`
@@ -237,6 +240,7 @@ func SetMonitor(data *ReportData) *write.Point {
 		FileName:       data.FileName,
 		Url:            data.Url,
 		ElapsedTime:    data.ElapsedTime,
+		Value:          data.Value,
 	}
 
 	if data.Type == "xhr" || data.Type == "fetch" {
@@ -321,6 +325,12 @@ func GetMonitor(pageNum int, pageSize int, maps *MonitorParams) (interface{}, in
 		query = fmt.Sprintf(`%s
 			|> filter(fn: (r) => r["userId"] == "%s")
 			`, query, maps.UserId)
+	}
+
+	if maps.UUID != "" {
+		query = fmt.Sprintf(`%s
+			|> filter(fn: (r) => r["uuid"] == "%s")
+			`, query, maps.UUID)
 	}
 
 	if maps.Name != "" {
