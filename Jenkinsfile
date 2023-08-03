@@ -19,7 +19,7 @@ pipeline {
         }
         stage('Build') { 
             steps {
-                sh 'go build -o main main.go -tags production' 
+                sh 'go build -tags production -o main main.go' 
             }
         }
     }
