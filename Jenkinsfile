@@ -13,7 +13,7 @@ pipeline {
             }
         }
         stage('Get') { 
-            steps {production
+            steps {
                 sh 'go get -u' 
             }
         }
