@@ -13,13 +13,13 @@ pipeline {
             }
         }
         stage('Get') { 
-            steps {
+            steps {production
                 sh 'go get -u' 
             }
         }
         stage('Build') { 
             steps {
-                sh 'go build -o main main.go' 
+                sh 'go build -o main main.go -tags production' 
             }
         }
     }
