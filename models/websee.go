@@ -346,6 +346,7 @@ func GetMonitor(pageNum int, pageSize int, maps *MonitorParams) (interface{}, in
 
 	query = fmt.Sprintf(`%s
 	|> drop(columns:["_start","_stop"])
+	|> sort(columns: ["_time"], desc: true)
 	|> limit(n: %d, offset: %d)
 	`, query, pageSize, pageNum)
 
