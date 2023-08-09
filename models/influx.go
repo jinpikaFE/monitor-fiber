@@ -12,8 +12,8 @@ var influxdbClient influxdb2.Client
 var org, bucket string
 
 // 写入数据的api 实例
-var writeAPI api.WriteAPI
-var queryAPI api.QueryAPI
+var WriteAPI api.WriteAPI
+var QueryAPI api.QueryAPI
 
 func init() {
 	sec, err := setting.Cfg.GetSection("influxdb")
@@ -29,6 +29,6 @@ func init() {
 	influxdbClient = influxdb2.NewClientWithOptions(host, token, influxdb2.DefaultOptions().SetBatchSize(100))
 
 	// Create a new write API instance
-	writeAPI = influxdbClient.WriteAPI(org, bucket)
-	queryAPI = influxdbClient.QueryAPI(org)
+	WriteAPI = influxdbClient.WriteAPI(org, bucket)
+	QueryAPI = influxdbClient.QueryAPI(org)
 }

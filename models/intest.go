@@ -37,7 +37,7 @@ func SetTest() *write.Point {
 		},
 		time.Now()) // 时间戳
 	// write point asynchronously
-	writeAPI.WritePoint(p)
+	WriteAPI.WritePoint(p)
 
 	// // create point using fluent style
 	// p = influxdb2.NewPointWithMeasurement("stat").
@@ -47,7 +47,7 @@ func SetTest() *write.Point {
 	// 	SetTime(time.Now())
 	// // write point asynchronously
 	// writeAPI.WritePoint(p)
-	writeAPI.Flush()
+	WriteAPI.Flush()
 	return p
 }
 
@@ -57,7 +57,7 @@ func GetTest() (interface{}, error) {
 	|> filter(fn: (r) => r._measurement == "whiteScreen")
 	|> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
 	|> drop(columns:["_start","_stop"])` // 丢弃不需要的字段
-	result, err := queryAPI.Query(context.Background(), query)
+	result, err := QueryAPI.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/jinpikaFE/go_fiber/pkg/e"
 	"github.com/jinpikaFE/go_fiber/pkg/logging"
 	"github.com/jinpikaFE/go_fiber/pkg/valodates"
+	"github.com/jinpikaFE/go_fiber/services"
 )
 
 // 添加监控数据
@@ -42,7 +43,7 @@ func SetMonitor(c *fiber.Ctx) error {
 	default:
 		return appF.Response(fiber.StatusInternalServerError, fiber.StatusInternalServerError, "参数解析错误", fmt.Errorf("unsupported Content-Type: %v", ct))
 	}
-	p := models.SetMonitor(data)
+	p := services.SetMonitor(data)
 	return appF.Response(fiber.StatusOK, fiber.StatusOK, "SUCCESS", p)
 }
 
@@ -76,7 +77,7 @@ func GetMonitor(c *fiber.Ctx) error {
 		return appF.Response(fiber.StatusBadRequest, fiber.StatusBadRequest, "检验参数错误", errors)
 	}
 
-	p, resultCount, err := models.GetMonitor((page.Page-1)*page.PageSize, page.PageSize, maps)
+	p, resultCount, err := services.GetMonitor((page.Page-1)*page.PageSize, page.PageSize, maps)
 	if err != nil {
 		return appF.Response(fiber.StatusInternalServerError, fiber.StatusInternalServerError, "查询失败", err)
 	}
@@ -110,7 +111,7 @@ func GetEchartMonitor(c *fiber.Ctx) error {
 		return appF.Response(fiber.StatusBadRequest, fiber.StatusBadRequest, "检验参数错误", errors)
 	}
 
-	p, err := models.GetEchartMonitor(maps)
+	p, err := services.GetEchartMonitor(maps)
 	if err != nil {
 		return appF.Response(fiber.StatusInternalServerError, fiber.StatusInternalServerError, "查询失败", err)
 	}
@@ -132,7 +133,7 @@ func GetRecordScreen(c *fiber.Ctx) error {
 	appF := app.Fiber{C: c}
 	id := c.Params("id")
 
-	p, err := models.GetRecordScreen(id)
+	p, err := services.GetRecordScreen(id)
 	if err != nil {
 		return appF.Response(fiber.StatusInternalServerError, fiber.StatusInternalServerError, "查询失败", err)
 	}
