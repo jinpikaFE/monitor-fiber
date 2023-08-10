@@ -103,6 +103,7 @@ func InitRouter() *fiber.App {
 
 	{
 		apiv1.Post("/upload", controller.Upload)
+		apiv1.Post("/uploadSource", controller.UploadSource)
 	}
 
 	return app

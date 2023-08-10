@@ -142,4 +142,23 @@ paths:
       summary: 文件上传
       tags:
       - 文件上传
+  /v1/uploadSource:
+    post:
+      consumes:
+      - application/json
+      description: 代码源文件上传
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.ResponseHTTP'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/controller.ResponseHTTP'
+      summary: 代码源文件上传
+      tags:
+      - 文件上传
 swagger: "2.0"

@@ -216,6 +216,35 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v1/uploadSource": {
+            "post": {
+                "description": "代码源文件上传",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "文件上传"
+                ],
+                "summary": "代码源文件上传",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseHTTP"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseHTTP"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
