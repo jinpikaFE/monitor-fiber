@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"strings"
@@ -15,6 +16,17 @@ import (
 )
 
 func SetMgbData(data map[string]interface{}) (*mongo.InsertOneResult, error) {
+	if data["message"] != nil {
+		var jsonValue interface{}
+		jsonData := data["message"].(string)
+		err := json.Unmarshal([]byte(jsonData), &jsonValue)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return nil, err
+		}
+		data["message"] = jsonValue
+	}
+
 	res, err := database.MgbDatabase.Collection(data["type"].(string)).InsertOne(context.Background(), data)
 	return res, err
 }
