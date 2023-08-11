@@ -16,6 +16,62 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/v1/mgb/monitor": {
+            "get": {
+                "description": "获取Monodb监控数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Monodb监控数据处理"
+                ],
+                "summary": "获取Monodb监控数据",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseHTTP"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseHTTP"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "添加Monodb监控数据",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Monodb监控数据处理"
+                ],
+                "summary": "添加Monodb监控数据",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseHTTP"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ResponseHTTP"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/monitor": {
             "get": {
                 "description": "获取监控数据",
